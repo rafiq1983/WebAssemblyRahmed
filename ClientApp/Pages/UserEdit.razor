@@ -1,0 +1,92 @@
+﻿@page "/userEdit/{selectedContactId}"
+@inject HttpClient Http
+@inject NavigationManager nav
+
+<div class="col-12 col-sm-12 col-md-4 col-lg-4 col-xl-4">
+    @if (selectedContact is not null)
+    {
+   
+    <EditForm class="container" Model="selectedContact" OnValidSubmit="SaveUser">
+        <DataAnnotationsValidator />
+        <div class="form-group">
+            <label>First Name</label>
+            <InputText id="txtFirstName" @bind-Value="selectedContact.firstName" placeholder="First Name..." class="form-control" />
+            <ValidationMessage For="@(() => selectedContact.firstName)" />
+        </div>
+
+
+        <div class="form-group">
+            <label>Last Name</label>
+            <InputText id="txtLastName" @bind-Value="selectedContact.lastName" placeholder="First Name..." class="form-control" />
+            <ValidationMessage For="@(() => selectedContact.lastName)" />
+        </div>
+
+        <div class="form-group">
+            <label>Age</label>
+            <InputNumber id="txtAge" @bind-Value="selectedContact.age" placeholder="First Name..." class="form-control" />
+            <ValidationMessage For="@(() => selectedContact.age)" />
+        </div>
+
+        <div class="form-group">
+            <label>Phone</label>
+            <InputText id="txtPhone" @bind-Value="selectedContact.phone" placeholder="First Name..." class="form-control" />
+            <ValidationMessage For="@(() => selectedContact.phone)" />
+        </div>
+
+        <div class="form-group">
+            <label>Address</label>
+            <InputText id="txtAddress" @bind-Value="selectedContact.address" placeholder="First Name..." class="form-control" />
+            <ValidationMessage For="@(() => selectedContact.address)" />
+        </div>
+        
+
+
+
+        <div class="row">
+            <div class="col">
+                <button type="submit" class="btn btn-success float-right">Save</button>
+                <button type="button" @onclick="Cancel" class="btn btn-danger">Cancel</button>
+            </div>
+                 
+        </div>
+    </EditForm>
+    }
+    else
+    {
+        <p>No user selected</p>
+    }
+</div>
+
+
+@code {
+
+    [Parameter]
+    public string selectedContactId { get; set; }
+    private Contact? selectedContact;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetContact(Guid.Parse(selectedContactId));
+    }
+
+    private async Task GetContact(Guid contactId)
+    {
+        selectedContact = await Http.GetFromJsonAsync<Contact>($"/api/Contacts/{contactId}"); 
+    }
+
+
+    private void Cancel()
+    {
+        nav.NavigateTo("/users/");
+    }
+
+    private async Task SaveUser()
+    {
+        if (selectedContact != null)
+        {
+            await Http.PutAsJsonAsync<Contact>("/api/Contacts/", selectedContact);
+            nav.NavigateTo("/users/");
+        }
+    }
+
+}

@@ -1,0 +1,68 @@
+﻿@page "/users"
+@inject HttpClient Http
+@inject NavigationManager nav
+
+<PageTitle>User Management</PageTitle>
+
+<h1>User Management</h1>
+
+@if(Contacts != null)
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Age</th>
+                <th>Adress</th>
+                <th>Phone</th>
+                <th>&nbsp</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var contact in Contacts)
+            {
+                <tr>
+                    <td>@contact.firstName</td>
+                    <td>@contact.lastName</td>
+                    <td>@contact.age</td>
+                    <td>@contact.address</td>
+                    <td>@contact.phone</td>
+                    <td>                       
+                        <button class="btn btn-info" @onclick="() => EditUser(contact.id)">Edit</button>
+                        <button class="btn btn-danger" @onclick="() => DeleteUser(contact.id)">Delete</button>
+
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+
+@code {
+    private Contact[]? Contacts;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetContacts();
+    }
+
+    private async Task GetContacts()
+    {
+        Contacts = await Http.GetFromJsonAsync<Contact[]>("/api/Contacts/All"); 
+    }
+
+    private void EditUser(Guid contactId)
+    {
+        nav.NavigateTo("/userEdit/" + contactId.ToString());
+
+    }
+
+    private async Task DeleteUser(Guid contactId)
+    {
+       await Http.DeleteAsync($"/api/Contacts/{contactId}");
+       await GetContacts();
+    }
+
+}
